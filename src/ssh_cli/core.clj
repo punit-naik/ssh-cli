@@ -6,52 +6,33 @@
 (defn- prepare-cmd
   "Prepares a shell command string"
   [cmd]
-  ["bash -c \"" (escape cmd {\" "\\\""}) "\""])
-
-(defn- exec-remote-using-pvt-key
-  "Executes a command on a remote machine via ssh using a private key"
-  [{:keys [machine cmd identity-file]}]
-  (apply sh
-    (into ["ssh" machine "-o" "StrictHostKeyChecking=no" "-i" identity-file]
-          (prepare-cmd cmd))))
-
-(defn- exec-remote-using-password
-  "Executes a command on a remote machine via ssh using password
-   NOTE: Will make use of the `sshpass` utility"
-  [{:keys [machine cmd password]}]
-  (apply sh
-    (into ["sshpass" "-p" password "ssh" machine "-o" "StrictHostKeyChecking=no"]
-          (prepare-cmd cmd))))
+  (str "bash -c \"" (escape cmd {\" "\\\""}) "\""))
 
 (defn exec-remote
   "Executes a command on a remote machine via ssh"
-  [{:keys [identity-file] :as arg-map}]
+  [{:keys [identity-file machine cmd password] :as arg-map}]
   (info (str "Executing command - " (:cmd arg-map) " - on the machine " (:machine arg-map) " ..."))
-  (if identity-file
-    (exec-remote-using-pvt-key arg-map)
-    (exec-remote-using-password arg-map)))
-
-(defn- scp-using-pvt-key
-  "SCPs a file from one machine to another using a private key"
-  ([{:keys [from to identity-file]} dir?]
-   (if dir?
-     (apply sh ["scp" "-o" "StrictHostKeyChecking=no" "-i" identity-file "-r" from to])
-     (apply sh ["scp" "-o" "StrictHostKeyChecking=no" "-i" identity-file from to])))
-  ([arg-map] (scp-using-pvt-key arg-map false)))
-
-(defn- scp-using-password
-  "SCPs a file from one machine to another using password
-   NOTE: Will make use of the `sshpass` utility"
-  ([{:keys [from to password]} dir?]
-   (if dir?
-     (apply sh ["sshpass" "-p" password "scp" "-o" "StrictHostKeyChecking=no" "-r" from to])
-     (apply sh ["sshpass" "-p" password "scp" "-o" "StrictHostKeyChecking=no" from to])))
-  ([arg-map] (scp-using-password arg-map false)))
+  (let [ssh-cmd ["ssh" machine "-o" "StrictHostKeyChecking=no"]]
+    (if identity-file
+      (apply sh
+        (into ssh-cmd ["-i" identity-file (prepare-cmd cmd)]))
+      (apply sh
+        (into ["sshpass" "-p" password] (conj ssh-cmd (prepare-cmd cmd)))))))
 
 (defn scp
   "SCPs a file from one machine to another"
-  [{:keys [identity-file] :as arg-map}]
-  (info (str "SCPing file from " (:from arg-map) " to " (:to arg-map) " ..."))
-  (if identity-file
-    (scp-using-pvt-key arg-map)
-    (scp-using-password arg-map)))
+  ([arg-map] (scp arg-map false))
+  ([{:keys [identity-file from to password] :as arg-map} dir?]
+   (info (str "SCPing file from " (:from arg-map) " to " (:to arg-map) " ..."))
+   (let [scp-cmd ["scp" "-o" "StrictHostKeyChecking=no"]
+         source-dest [from to]]
+     (if identity-file
+       (apply sh
+         (into (cond-> (into scp-cmd ["-i" identity-file])
+                       dir? (conj "-r")) source-dest))
+       (do
+         (println (into (cond-> (into ["sshpass" "-p" password] scp-cmd)
+                                dir? (conj "-r")) source-dest))
+         (apply sh
+           (into (cond-> (into ["sshpass" "-p" password] scp-cmd)
+                         dir? (conj "-r")) source-dest)))))))
