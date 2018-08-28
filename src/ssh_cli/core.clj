@@ -30,9 +30,6 @@
        (apply sh
          (into (cond-> (into scp-cmd ["-i" identity-file])
                        dir? (conj "-r")) source-dest))
-       (do
-         (println (into (cond-> (into ["sshpass" "-p" password] scp-cmd)
-                                dir? (conj "-r")) source-dest))
-         (apply sh
-           (into (cond-> (into ["sshpass" "-p" password] scp-cmd)
-                         dir? (conj "-r")) source-dest)))))))
+       (apply sh
+         (into (cond-> (into ["sshpass" "-p" password] scp-cmd)
+                       dir? (conj "-r")) source-dest))))))
