@@ -1,3 +1,5 @@
+[![Clojars Project](https://img.shields.io/clojars/v/ssh-cli.svg)](https://clojars.org/ssh-cli)
+
 # ssh-cli
 
 A Clojure library designed to interact with the SSH CLI to perform tasks like setting up passwordless SSH between machines, executing remote commands, performing SCP, etc.
