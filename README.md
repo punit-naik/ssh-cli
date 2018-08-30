@@ -20,7 +20,7 @@ sudo apt-get install -y sshpass
 
 ## Testing
 
-**NOTE: Please paste your local machine's password as text in the `resources/passwd` file before continuing with the below command and also, please remove your public key from `~/.ssh/authorized_keys` if present**
+**NOTE: Please paste your local machine's password as text in the `resources/passwd` file before continuing with the below command and also, please remove your public key from `~/.ssh/authorized_keys` if present!**
 
 ```
 lein test
