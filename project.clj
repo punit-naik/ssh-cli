@@ -7,4 +7,4 @@
                  [com.taoensso/timbre "4.10.0"]]
   :pom-addition [:developers [:developer
                               [:name "Punit Naik"]
-			      [:email "naik.punit44@gmail.com"]]])
+                              [:email "naik.punit44@gmail.com"]]])
