@@ -13,10 +13,9 @@
   [{:keys [identity-file machine cmd password] :as arg-map}]
   (info (str "Executing command - " (:cmd arg-map) " - on the machine " (:machine arg-map) " ..."))
   (let [ssh-cmd ["ssh" machine "-o" "StrictHostKeyChecking=no"]]
-    (if identity-file
-      (apply sh
-        (into ssh-cmd ["-i" identity-file (prepare-cmd cmd)]))
-      (apply sh
+    (apply sh
+      (if identity-file
+        (into ssh-cmd ["-i" identity-file (prepare-cmd cmd)])
         (into ["sshpass" "-p" password] (conj ssh-cmd (prepare-cmd cmd)))))))
 
 (defn scp
@@ -26,10 +25,10 @@
    (info (str "SCPing file from " (:from arg-map) " to " (:to arg-map) " ..."))
    (let [scp-cmd ["scp" "-o" "StrictHostKeyChecking=no"]
          source-dest [from to]]
-     (if identity-file
-       (apply sh
-         (into (cond-> (into scp-cmd ["-i" identity-file])
-                       dir? (conj "-r")) source-dest))
-       (apply sh
-         (into (cond-> (into ["sshpass" "-p" password] scp-cmd)
-                       dir? (conj "-r")) source-dest))))))
+     (apply sh
+       (into
+         (cond-> (if identity-file
+                   (into scp-cmd ["-i" identity-file])
+                   (into ["sshpass" "-p" password] scp-cmd))
+                 dir? (conj "-r"))
+         source-dest)))))
