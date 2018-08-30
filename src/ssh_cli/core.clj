@@ -23,12 +23,11 @@
   ([arg-map] (scp arg-map false))
   ([{:keys [identity-file from to password] :as arg-map} dir?]
    (info (str "SCPing file from " (:from arg-map) " to " (:to arg-map) " ..."))
-   (let [scp-cmd ["scp" "-o" "StrictHostKeyChecking=no"]
-         source-dest [from to]]
+   (let [scp-cmd ["scp" "-o" "StrictHostKeyChecking=no"]]
      (apply sh
        (into
          (cond-> (if identity-file
                    (into scp-cmd ["-i" identity-file])
                    (into ["sshpass" "-p" password] scp-cmd))
                  dir? (conj "-r"))
-         source-dest)))))
+         [from to])))))
