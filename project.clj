@@ -1,4 +1,4 @@
-(defproject ssh-cli "0.1.1"
+(defproject ssh-cli "1.0.0"
   :description "A Clojure library designed to interact with the SSH CLI to perform tasks like setting up passwordless SSH between machines, executing remote commands, performing SCP, etc."
   :url "https://github.com/punit-naik/ssh-cli.git"
   :license {:name "Eclipse Public License"
