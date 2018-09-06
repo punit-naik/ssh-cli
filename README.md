@@ -11,8 +11,9 @@ You need to have the following installed:
 ```
 sudo apt-get install -y openssh-server openssh-client
 ```
+Chances are you already have the above installed :smiley:
 
-Install the following utility for passing passwords prompted by SSH in the CLI itself (non-interactive):
+Install the following utility for passing passwords prompted by SSH in the CLI itself (non-interactive) i.e. if you are opting to authenticate via `password` and not a `private key` (the latter is recommended):
 
 ```
 sudo apt-get install -y sshpass
