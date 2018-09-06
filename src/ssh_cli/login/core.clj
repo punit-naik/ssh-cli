@@ -31,6 +31,9 @@
         (exec-remote {:machine machine :cmd (ssh-conf private-ip) :identity-file identity-file})))))
 
 (defn- setup-passwordless-ssh-using-created-keys
+  "Uses first `password` for authentication, creates SSH Key Pairs on the machines in the cluster
+   and then uses the created key for SSH login
+   Does not create key pair if already present"
   [{:keys [ip-list user-name password]}]
   (doseq [{:keys [public-ip private-ip]} ip-list]
     (let [machine (build-id user-name public-ip)
@@ -63,6 +66,7 @@
     (setup-passwordless-ssh-using-created-keys arg-map)))
 
 (comment
+  ;; If your `remote` machine is accessible via your local network, the `:public-ip` and `:private-ip` can be the same!
   (setup-passwordless-ssh {:user-name "ubuntu" :password ""
                            :identity-file "/path/key.pem"
                            :ip-list [{:public-ip "54.86.103.47" :private-ip "172.31.20.118"}
