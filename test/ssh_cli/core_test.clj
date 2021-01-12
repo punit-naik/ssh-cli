@@ -8,7 +8,7 @@
 (defonce ^:private machine (str user-name "@127.0.0.1"))
 (defonce ^:private password (trim (slurp (resource "passwd"))))
 
-(deftest passwordless-ssh-test
+(deftest local-scp-test
   (testing "SCP test on local machine..."
     (exec-remote {:machine machine
                   :cmd "mkdir ~/scp-1"
