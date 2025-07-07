@@ -1,7 +1,8 @@
 (ns ssh-cli.core
-  (:require [clojure.java.shell :refer [sh]]
-            [clojure.string :refer [escape]]
-            [taoensso.timbre :refer [info]]))
+  (:require
+   [clojure.java.shell :refer [sh]]
+   [clojure.string :refer [escape]]
+   [taoensso.timbre :refer [info]]))
 
 (defn- prepare-cmd
   "Prepares a shell command string"

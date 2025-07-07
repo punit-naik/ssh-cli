@@ -1,12 +1,12 @@
 (ns ssh-cli.login.core-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [clojure.java.io :refer [resource]]
-            [ssh-cli.login.core :refer [setup-passwordless-ssh]]
-            [ssh-cli.core :refer [exec-remote]]
-            [clojure.string :refer [trim]]))
+  (:require
+   [clojure.test :refer [deftest testing is]]
+   [ssh-cli.login.core :refer [setup-passwordless-ssh]]
+   [ssh-cli.core :refer [exec-remote]]
+   [clojure.string :refer [trim]]))
 
 (defonce ^:private user-name (System/getProperty "user.name"))
-(defonce ^:private password (trim (slurp (resource "passwd"))))
+(defonce ^:private password (trim (System/getenv "MACHINE_PASSWORD")))
 
 (deftest passwordless-ssh-test
   (testing "NOTE: Please paste your password as text in the `resources/passwd` file and also,

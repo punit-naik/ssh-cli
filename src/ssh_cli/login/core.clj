@@ -1,9 +1,9 @@
 (ns ssh-cli.login.core
-  (:require [clojure.java.shell :refer [sh]]
-            [ssh-cli.core :refer [exec-remote scp]]
-            [ssh-cli.utils :refer [build-id ssh-conf add-authorized-keys]]
-            [clojure.string :refer [split]]
-            [taoensso.timbre :refer [info]]))
+  (:require
+   [clojure.string :as str]
+   [ssh-cli.core :refer [exec-remote scp]]
+   [ssh-cli.utils :refer [add-authorized-keys build-id ssh-conf]]
+   [taoensso.timbre :refer [info]]))
 
 (defn- create-ssh-folder
   "Creates the ~/.ssh folder required to store key pairs and ssh configurations"
@@ -34,26 +34,30 @@
   "Uses first `password` for authentication, creates SSH Key Pairs on the machines in the cluster
    and then uses the created key for SSH login
    Does not create key pair if already present"
-  [{:keys [ip-list user-name password]}]
-  (doseq [{:keys [public-ip private-ip]} ip-list]
-    (let [machine (build-id user-name public-ip)
-          files (set (split (:out (exec-remote {:machine machine :password password :cmd "ls ~/.ssh"})) #"\n"))]
-      (create-ssh-folder {:machine machine :password password})
-      (when-not (contains? files "id_rsa")
-        (info (str "Generating SSH KeyPair on machine " private-ip " ..."))
-        (exec-remote {:machine machine
-                      :cmd "ssh-keygen -f ~/.ssh/id_rsa -t rsa -N '' -P ''"
-                      :password password}))))
-  (doseq [ip1 ip-list]
-    (let [machine-1 (build-id user-name (:public-ip ip1))]
-      (doseq [ip2 ip-list]
-        (info (str "Setting up passwordless SSH between the machines " (:private-ip ip1) " and " (:private-ip ip2) " ..."))
-        (exec-remote {:machine machine-1
-                      :cmd (add-authorized-keys
+  ([conf]
+   (setup-passwordless-ssh-using-created-keys "id_ed25519_created_using_ssh_cli" conf))
+  ([keypair-name {:keys [ip-list user-name password]}]
+   (doseq [{:keys [public-ip private-ip]} ip-list]
+     (let [machine (build-id user-name public-ip)
+           files (set (str/split (:out (exec-remote {:machine machine :password password :cmd "ls ~/.ssh"})) #"\n"))]
+       (create-ssh-folder {:machine machine :password password})
+       (when-not (contains? files keypair-name)
+         (info (str "Generating SSH KeyPair on machine " private-ip " ..."))
+         (info (:out
+                (exec-remote {:machine machine
+                              :cmd (str "ssh-keygen -f ~/.ssh/" keypair-name " -t ed25519 -N '' -P ''")
+                              :password password}))))))
+   (doseq [ip1 ip-list]
+     (let [machine-1 (build-id user-name (:public-ip ip1))]
+       (doseq [ip2 ip-list]
+         (info (str "Setting up passwordless SSH between the machines " (:private-ip ip1) " and " (:private-ip ip2) " ..."))
+         (exec-remote {:machine machine-1
+                       :cmd (add-authorized-keys
                              (:out
-                               (exec-remote {:machine (build-id user-name (:public-ip ip2)) :cmd "cat ~/.ssh/id_rsa.pub"
-                                             :password password})))
-                      :password password})))))
+                              (exec-remote {:machine (build-id user-name (:public-ip ip2))
+                                            :cmd (str "cat ~/.ssh/" keypair-name ".pub")
+                                            :password password})))
+                       :password password}))))))
 
 (defn setup-passwordless-ssh
   "Sets up passwordless SSH login between machines.

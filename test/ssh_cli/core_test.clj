@@ -1,12 +1,12 @@
 (ns ssh-cli.core-test
-  (:require [clojure.test :refer [deftest testing is]]
-            [clojure.java.io :refer [resource]]
-            [ssh-cli.core :refer [exec-remote scp]]
-            [clojure.string :refer [trim split]]))
+  (:require
+   [clojure.test :refer [deftest testing is]]
+   [ssh-cli.core :refer [exec-remote scp]]
+   [clojure.string :refer [trim split]]))
 
 (defonce ^:private user-name (System/getProperty "user.name"))
 (defonce ^:private machine (str user-name "@127.0.0.1"))
-(defonce ^:private password (trim (slurp (resource "passwd"))))
+(defonce ^:private password (trim (System/getenv "MACHINE_PASSWORD")))
 
 (deftest local-scp-test
   (testing "SCP test on local machine..."
