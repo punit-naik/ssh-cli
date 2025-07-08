@@ -13,7 +13,8 @@
     (exec-remote {:machine machine
                   :cmd "mkdir ~/scp-1"
                   :password password})
-    (scp {:from (str "/home/" user-name "/scp-1") :to (str machine ":/home/" user-name "/scp-2")
+    (scp {:from (str "/home/" user-name "/scp-1")
+          :to (str machine "/home/" user-name "/scp-2")
           :password password} true)
     (let [directory-contents (set (split (:out (exec-remote {:machine machine :cmd "ls ~" :password password})) #"\n"))]
       (is (contains? directory-contents "scp-1"))

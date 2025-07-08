@@ -22,7 +22,7 @@
       (create-ssh-folder {:machine machine :identity-file identity-file})
       (info (str "SCPing private key to the machine " (:private-ip ip1) " ..."))
       (scp {:from identity-file
-            :to (str machine ":/home/" user-name "/.ssh/pvt-key.pem")
+            :to (str machine "/home/" user-name "/.ssh/pvt-key.pem")
             :identity-file identity-file})
       (info (str "Setting appropriate permissions on the copied file on the machine " (:private-ip ip1) " ..."))
       (exec-remote {:machine machine :cmd "chmod 400 ~/.ssh/pvt-key.pem" :identity-file identity-file})
